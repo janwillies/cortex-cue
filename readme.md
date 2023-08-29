@@ -13,20 +13,8 @@ install `cortex` and `minio` to the kubernetes cluster:
 ```bash
 kubectl apply -f generated.yaml
 ```
+this will also launch a pod to create a respective bucket in minio.
 
-### prepare object store
-we need to create a bucket before we can store rules in cortex
-
-port-forward the minio api:
-```bash
-kubectl port-forward deployment/minio 9000
-```
-download the minio client ([mc](https://min.io/docs/minio/linux/reference/minio-mc-admin.html#id2)) and create the `cortex` bucket:
-```bash
-./mc alias set local http://localhost:9000 minioadmin minioadmin
-./mc mb local/cortex
-./mc tree local/
-```
 ### test the setup
 port-forward the cortex api:
 ```bash
@@ -62,4 +50,16 @@ cue dump ./... > generated.yaml
 ```bash
 cue export --out yaml -e service.minio -e deployment.minio ./minio | kubectl apply -f -
 cue export --out yaml -e configMap.cortex -e deployment.cortex ./cortex | kubectl apply -f -
+```
+
+### prepare object store manually
+port-forward the minio api:
+```bash
+kubectl port-forward deployment/minio 9000
+```
+download the minio client ([mc](https://min.io/docs/minio/linux/reference/minio-mc-admin.html#id2)) and create the `cortex` bucket:
+```bash
+./mc alias set local http://localhost:9000 minioadmin minioadmin
+./mc mb local/cortex
+./mc tree local/
 ```

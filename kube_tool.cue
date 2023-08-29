@@ -6,4 +6,5 @@ objectSets: [
 	service,
 	deployment,
 	configMap,
+	pod,
 ]

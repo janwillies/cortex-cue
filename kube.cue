@@ -3,6 +3,18 @@ package kube
 bucketName: "cortex"
 k8s: namespace: "default"
 
+pod: [ID=_]: {
+	apiVersion: "v1"
+	kind: "Pod"
+	metadata: name: ID
+	metadata: namespace: k8s.namespace
+	metadata: labels: app: ID
+	spec: {
+		containers: [{name: ID}]
+		// serviceAccountName: ID
+	}
+}
+
 service: [ID=_]: {
 	apiVersion: "v1"
 	kind:       "Service"
