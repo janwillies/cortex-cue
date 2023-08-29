@@ -2,6 +2,21 @@ apiVersion: v1
 kind: Service
 spec:
   ports:
+    - port: 9009
+      protocol: TCP
+      name: http-api
+  selector:
+    app: cortex
+metadata:
+  name: cortex
+  namespace: default
+  labels:
+    app: cortex
+---
+apiVersion: v1
+kind: Service
+spec:
+  ports:
     - port: 9000
       protocol: TCP
       name: minio-s3
@@ -32,6 +47,9 @@ spec:
         - image: cortexproject/cortex:v1.15.2
           args:
             - -config.file=/tmp/config.yaml
+          env:
+            - name: TMPDIR
+              value: /data/
           ports:
             - containerPort: 9009
           name: cortex
@@ -86,12 +104,14 @@ metadata:
 ---
 data:
   config.yaml: |
+    target: alertmanager,all
     auth_enabled: true
     server:
       http_listen_port: 9009
       grpc_server_max_recv_msg_size: 104857600
       grpc_server_max_send_msg_size: 104857600
       grpc_server_max_concurrent_streams: 1000
+      log_level: debug
     distributor:
       shard_by_all_labels: true
       pool:
@@ -125,6 +145,17 @@ data:
           store: inmemory
     frontend_worker:
       match_max_concurrent: true
+    alertmanager:
+      enable_api: true
+      external_url: http://localhost
+    alertmanager_storage:
+      backend: s3
+      s3:
+        endpoint: minio.default.svc:9000
+        secret_access_key: minioadmin
+        access_key_id: minioadmin
+        insecure: true
+        bucket_name: cortex
     ruler:
       enable_api: true
     ruler_storage:
